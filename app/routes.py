@@ -1,8 +1,7 @@
 from datetime import datetime
 from flask import render_template, flash, redirect, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
-from flask_babel import _
-from flask_babel import lazy_gettext as _l
+from flask_babel import _, lazy_gettext as _l, get_locale
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm
@@ -28,7 +27,7 @@ def index():
         if posts.has_next else None
     prev_url = url_for('index', page=posts.prev_num) \
         if posts.has_prev else None
-    return render_template('index.html', title='Home',form=form, 
+    return render_template('index.html', title=_('Home'),form=form, 
         posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 
@@ -47,7 +46,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', title=_('Sign In'), form=form)
 
 
 @app.route('/logout')
@@ -68,7 +67,7 @@ def register():
         db.session.commit()
         flash(_('Congratulations, you are now a registered user!'))
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title=_('Register'), form=form)
 
 
 @app.route('/user/<username>')
@@ -106,7 +105,7 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
+    return render_template('edit_profile.html', title=_('Edit Profile'), form=form)
 
 
 @app.route('/follow/<username>')
@@ -114,14 +113,14 @@ def edit_profile():
 def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
-        flash(_('User %(username) not found.', username=username))
+        flash(_('User %(username)s not found.', username=username))
         return redirect(url_for('index'))
     if user == current_user:
         flash(_('You can\'t follow yourself!'))
         return redirect(url_for('user', username=username))
     current_user.follow(user)
     db.session.commit()
-    flash(_('You are now following %(username)!', username=username))
+    flash(_('You are now following %(username)s!', username=username))
     return redirect(url_for('user', username=username))
 
 
@@ -130,14 +129,14 @@ def follow(username):
 def unfollow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
-        flash(_('User %(username) not found.', username=username))
+        flash(_('User %(username)s not found.', username=username))
         return redirect(url_for('index'))
     if user == current_user:
         flash(_('You can\'t unfollow yourself!'))
         return redirect(url_for('user', username=username))
     current_user.unfollow(user)
     db.session.commit()
-    flash(_('You aren\'t following %(username).', username=username))
+    flash(_('You aren\'t following %(username)s.', username=username))
     return redirect(url_for('user', username=username))
 
 
@@ -151,7 +150,7 @@ def explore():
         if posts.has_next else None
     prev_url = url_for('explore', page=posts.prev_num) \
         if posts.has_prev else None
-    return render_template('index.html', title='Explore', posts=posts.items,
+    return render_template('index.html', title=_('Explore'), posts=posts.items,
         next_url=next_url, prev_url=prev_url)
 
 
@@ -166,7 +165,7 @@ def reset_password_request():
             send_password_reset_email(user)
         flash(_('Check your email for the instructions to reset your password'))
         return redirect(url_for('login'))
-    return render_template('reset_password_request.html', title='Reset Password',
+    return render_template('reset_password_request.html', title=_('Reset Password'),
         form=form)
 
 
